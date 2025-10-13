@@ -1,0 +1,9 @@
+# Cron jobs for currency exchange rate monitoring
+# Output is redirected to /var/log/cron.log
+
+# Daily at 6:00 AM - Get MDL to EUR exchange rate for the previous day
+0 6 * * * cd /app && /usr/local/bin/python currency_exchange_rate.py MDL EUR $(date -d "yesterday" +\%Y-\%m-\%d) --url http://host.docker.internal:8080 >> /var/log/cron.log 2>&1
+
+# Weekly on Friday at 5:00 PM - Get MDL to USD exchange rate for the previous week (7 days ago)
+0 17 * * 5 cd /app && /usr/local/bin/python currency_exchange_rate.py MDL USD $(date -d "7 days ago" +\%Y-\%m-\%d) --url http://host.docker.internal:8080 >> /var/log/cron.log 2>&1
+

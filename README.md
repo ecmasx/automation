@@ -34,3 +34,20 @@ Script Python pentru exercitiul IW02 - client API pentru cursuri de schimb valut
 **Monede suportate:** MDL, USD, EUR, RON, UAH
 
 **Vezi:** [lab02/README.md](lab02/README.md)
+
+### lab03
+
+Automatizare folosind cron pentru exercitiul IW03 - monitorizare automata a cursurilor de schimb valutar. Include configurarea unui container Docker cu cron pentru executarea periodica a scriptului de la lab02.
+
+**Caracteristici principale:**
+
+- Executie automata zilnica la ora 6:00 pentru cursul MDL la EUR (ziua precedenta)
+- Executie automata saptamanala vineri la ora 17:00 pentru cursul MDL la USD (saptamana precedenta)
+- Container Docker cu Python si cron
+- Logging complet al tuturor executiilor
+- Persistenta datelor in volum Docker
+- Monitorizare in timp real a log-urilor cron
+
+**Tehnologii folosite:** Docker, Docker Compose, Cron, Python
+
+**Vezi:** [lab03/README.md](lab03/README.md)
