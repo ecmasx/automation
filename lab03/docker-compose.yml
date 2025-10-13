@@ -1,0 +1,19 @@
+version: "3.8"
+
+services:
+  currency-cron:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: currency-cron-scheduler
+    volumes:
+      - ./data:/app/data
+      - cron-logs:/var/log
+    restart: unless-stopped
+    environment:
+      - TZ=Europe/Chisinau
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+volumes:
+  cron-logs:
