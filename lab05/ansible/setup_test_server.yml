@@ -1,0 +1,106 @@
+---
+- name: Setup Test Server for PHP Application
+  hosts: test_servers
+  become: yes
+  vars:
+    web_root: /var/www/html/php-app
+    server_name: localhost
+    php_extensions:
+      - php-cli
+      - php-mysql
+      - php-xml
+      - php-mbstring
+      - php-curl
+      - php-zip
+      - php-bcmath
+      - php-intl
+      - php-gd
+      - php-json
+
+  tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Install Apache2
+      apt:
+        name: apache2
+        state: present
+
+    - name: Install PHP and extensions
+      apt:
+        name: "{{ item }}"
+        state: present
+      loop: "{{ php_extensions }}"
+
+    - name: Ensure Apache2 is running and enabled
+      systemd:
+        name: apache2
+        state: started
+        enabled: yes
+
+    - name: Create web root directory
+      file:
+        path: "{{ web_root }}"
+        state: directory
+        owner: ansible
+        group: ansible
+        mode: "0755"
+
+    - name: Configure Apache virtual host
+      template:
+        src: php-app.conf.j2
+        dest: /etc/apache2/sites-available/php-app.conf
+        owner: root
+        group: root
+        mode: "0644"
+      notify: restart apache2
+
+    - name: Enable PHP module in Apache
+      command: a2enmod php7.4
+      notify: restart apache2
+      ignore_errors: yes
+
+    - name: Enable rewrite module
+      command: a2enmod rewrite
+      notify: restart apache2
+
+    - name: Disable default site
+      command: a2dissite 000-default
+      notify: restart apache2
+
+    - name: Enable PHP application site
+      command: a2ensite php-app
+      notify: restart apache2
+
+    - name: Create info.php file for testing
+      copy:
+        content: "<?php phpinfo(); ?>"
+        dest: "{{ web_root }}/info.php"
+        owner: ansible
+        group: ansible
+        mode: "0644"
+
+    - name: Create index.php file
+      copy:
+        content: "<?php echo '<h1>PHP Application is Running!</h1>'; echo '<p>Server: ' . $_SERVER['SERVER_NAME'] . '</p>'; echo '<p>Time: ' . date('Y-m-d H:i:s') . '</p>'; ?>"
+        dest: "{{ web_root }}/index.php"
+        owner: ansible
+        group: ansible
+        mode: "0644"
+
+    - name: Set proper permissions for web directory
+      file:
+        path: "{{ web_root }}"
+        state: directory
+        owner: ansible
+        group: ansible
+        mode: "0755"
+        recurse: yes
+
+  handlers:
+    - name: restart apache2
+      systemd:
+        name: apache2
+        state: restarted

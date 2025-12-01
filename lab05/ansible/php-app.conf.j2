@@ -1,0 +1,26 @@
+<VirtualHost *:80>
+    ServerName {{ server_name }}
+    DocumentRoot {{ web_root }}
+
+    <Directory {{ web_root }}>
+        Options Indexes FollowSymLinks
+        AllowOverride All
+        Require all granted
+    </Directory>
+
+    ErrorLog ${APACHE_LOG_DIR}/php-app_error.log
+    CustomLog ${APACHE_LOG_DIR}/php-app_access.log combined
+
+    # Enable PHP
+    <FilesMatch \.php$>
+        SetHandler application/x-httpd-php
+    </FilesMatch>
+
+    # Directory index
+    DirectoryIndex index.php index.html
+
+    # Security headers
+    Header always set X-Content-Type-Options nosniff
+    Header always set X-Frame-Options DENY
+    Header always set X-XSS-Protection "1; mode=block"
+</VirtualHost>

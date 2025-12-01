@@ -1,0 +1,53 @@
+FROM ubuntu:20.04
+
+# Prevent interactive prompts during installation
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install openssh-server and required packages
+RUN apt-get update && apt-get install -y \
+    openssh-server \
+    apache2 \
+    php \
+    php-cli \
+    php-mysql \
+    php-xml \
+    php-mbstring \
+    php-curl \
+    php-zip \
+    php-bcmath \
+    php-intl \
+    php-gd \
+    php-json \
+    sudo \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create ansible user with sudo privileges
+RUN useradd -m -s /bin/bash ansible && \
+    echo 'ansible:ansible123' | chpasswd && \
+    usermod -aG sudo ansible && \
+    echo 'ansible ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+
+# Set up SSH for ansible user
+RUN mkdir -p /home/ansible/.ssh && \
+    chown -R ansible:ansible /home/ansible/.ssh && \
+    chmod 700 /home/ansible/.ssh
+
+# Configure SSH
+RUN sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin no/' /etc/ssh/sshd_config && \
+    sed -i 's/#PasswordAuthentication yes/PasswordAuthentication no/' /etc/ssh/sshd_config && \
+    sed -i 's/#PubkeyAuthentication yes/PubkeyAuthentication yes/' /etc/ssh/sshd_config && \
+    sed -i 's/#AuthorizedKeysFile/AuthorizedKeysFile/' /etc/ssh/sshd_config
+
+# Create web directory and set permissions
+RUN mkdir -p /var/www/html/php-app && \
+    chown -R ansible:ansible /var/www/html/php-app && \
+    chmod -R 755 /var/www/html/php-app
+
+# Create SSH host keys
+RUN ssh-keygen -A
+
+# Expose ports for SSH and Apache
+EXPOSE 22 80
+
+# Start SSH service
+CMD ["/usr/sbin/sshd", "-D"]
