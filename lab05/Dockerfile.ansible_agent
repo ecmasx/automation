@@ -1,0 +1,42 @@
+FROM ubuntu:20.04
+
+# Prevent interactive prompts during installation
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install Ansible and required dependencies
+RUN apt-get update && apt-get install -y \
+    ansible \
+    openssh-client \
+    git \
+    python3 \
+    python3-pip \
+    python3-dev \
+    libffi-dev \
+    libssl-dev \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install additional Python packages for Ansible modules
+RUN pip3 install \
+    pywinrm \
+    requests \
+    boto3 \
+    azure-cli \
+    docker-py
+
+# Create ansible user
+RUN useradd -m -s /bin/bash ansible
+
+# Set up SSH directory for ansible user
+RUN mkdir -p /home/ansible/.ssh && \
+    chown -R ansible:ansible /home/ansible/.ssh && \
+    chmod 700 /home/ansible/.ssh
+
+# Create working directory for Ansible playbooks
+WORKDIR /ansible
+
+# Set default user
+USER ansible
+
+# Verify Ansible installation
+RUN ansible --version

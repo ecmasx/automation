@@ -1,0 +1,15 @@
+# Secrets and sensitive files
+secrets/*.key
+secrets/*.pem
+secrets/jenkins_agent_ssh_key
+secrets/jenkins_agent_ssh_key.pub
+
+# Environment files with sensitive data
+.env
+
+# Jenkins data (if running locally)
+jenkins_home/
+
+# Docker volumes data
+*.log
+

@@ -1,0 +1,30 @@
+FROM jenkins/ssh-agent
+
+# Install PHP-CLI, Composer, PHPUnit and required extensions
+RUN apt-get update && apt-get install -y \
+    php-cli \
+    php-xml \
+    php-mbstring \
+    php-curl \
+    php-zip \
+    php-bcmath \
+    php-intl \
+    php-gd \
+    php-json \
+    php-mysql \
+    php-pgsql \
+    php-sqlite3 \
+    curl \
+    unzip \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+# Install PHPUnit globally
+RUN composer global require phpunit/phpunit
+ENV PATH="/root/.composer/vendor/bin:/usr/local/bin:${PATH}"
+
+# Set up working directory for Jenkins
+WORKDIR /home/jenkins/agent
